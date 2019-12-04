@@ -27,7 +27,9 @@ typedef double Theta_cos;
 typedef int OmegaNearZero;
 typedef double OmegaHatMatrix[3][3];
 typedef double OmegaHatMatrix_2[3][3];
-/*
+
+
+/* The input parameters
  * robot_M					: the configuration of robot's end-effector
  * 							  when it is at its zero position
  * robot_S					: the lists of screw axis S (S has DOF lists)
@@ -41,27 +43,31 @@ typedef struct {
 	Theta robot_joints_coordinate[DOF];
 } Robot;
 
-/* robot_T_space			: the configuration of robot's end-effector
- * 				  			  based on the fixed space frame by given joints coordinate
- * robot_T_body				: the configuration of robot's end-effector
- * 				 		      based on the body frame by given joints coordinate
- * robot_sin				: the sin value of all joints coordinates
- * robot_cos				: the cos value of all joints coordinates
- * robot_IsZero_space        		: judge the omega is near zero or not
- * robot_SE3_space				: the SE3 matrix of all joints
+/* sin and cos value of given theta
  * */
+typedef struct{
+	Theta_sin robot_sin;
+	Theta_cos robot_cos;
+}Theta_CAL;
+
+/* T			: the configuration of robot's end-effector by given joints coordinate
+ * isZero       : judge the omega is near zero or not
+ * SE3			: the SE3 matrix of all joints
+ * omegaHatMat  : [omega]
+ * omegaHatMat_2: [omega]^2
+ **/
+typedef struct{
+	T_matrix T;
+	OmegaNearZero isZero[DOF];
+	SE3matrix SE3[DOF];
+	OmegaHatMatrix omegaHatMat[DOF];
+	OmegaHatMatrix_2 omegaHatMat_2[DOF];
+}ForKin_CAL;
+
 typedef struct {
-	//sin & cos
-	Theta_sin robot_sin[DOF];
-	Theta_cos robot_cos[DOF];
-	//in the fixed space frame
-	T_matrix robot_T_space;
-	OmegaNearZero robot_IsZero_space[DOF];
-	SE3matrix robot_SE3_space[DOF];
-	OmegaHatMatrix robot_omegaHatMat_space[DOF];
-	OmegaHatMatrix_2 robot_omegaHatMat_2_space[DOF];
-	//in the body frame
-	T_matrix robot_T_body;
+	Theta_CAL theta_CAL[DOF];
+	ForKin_CAL forKinSpace;
+	ForKin_CAL forKinBody;
 } Robot_CAL;
 
 void robotInit(const Robot* robot, Robot_CAL* robot_CAL);
