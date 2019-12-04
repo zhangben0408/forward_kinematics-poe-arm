@@ -9,7 +9,7 @@
 #include "FKinematics.h"
 #include "gettime.h"
 
-u64 time;
+
 
 int main() {
 
@@ -30,6 +30,7 @@ int main() {
 
 	forwardKinematic(&robot, &robot_CAL);
 	XTime_GetTime(&end);
+	u64 time;
 	time = (u64) (end - start) * 1000000000 / COUNTS_PER_SECOND;
 	printf("CAL TIME is %d ns.\r\n", (u32) time);
 
