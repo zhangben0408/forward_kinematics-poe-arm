@@ -6,69 +6,82 @@
  */
 #include "FKinematics.h"
 
-void forwardKinematic(const Robot* robot, Robot_CAL* robot_CAL) {
-	forwardKinematicSpace(robot, robot_CAL);
+void forwardKinematic(const Robot* robot, Robot_CAL* robot_CAL, char flag) {
+	if (flag == BaseFrameFlag)
+		forwardKinematicSpace(robot, robot_CAL);
+	else if (flag == EndEffectorFrameFlag)
+		forwardKinematicBody(robot, robot_CAL);
+	else if (flag == ALLFrameFlag) {
+		forwardKinematicSpace(robot, robot_CAL);
+		forwardKinematicBody(robot, robot_CAL);
+	}
 }
 
 void forwardKinematicSpace(const Robot* robot, Robot_CAL* robot_CAL) {
 	for (int i = 0; i < DOF; i++)
-		matrixExp6(robot_CAL, robot->robot_joints_coordinate, robot->robot_S,
-				i);
+		matrixExp6(&(robot_CAL->forKinSpace), robot_CAL->theta_CAL,
+				robot->robot_joints_coordinate, robot->robot_S, i);
 	for (int i = DOF - 1; i >= 0; i--) {
-		matrixMult(robot_CAL->robot_SE3_space[i], robot_CAL->robot_T_space);
+		matrixMultSpace(robot_CAL->forKinSpace.SE3[i],
+				robot_CAL->forKinSpace.T);
 	}
 }
 
 void forwardKinematicBody(const Robot* robot, Robot_CAL* robot_CAL) {
-
+	for (int i = 0; i < DOF; i++)
+		matrixExp6(&(robot_CAL->forKinBody), robot_CAL->theta_CAL,
+				robot->robot_joints_coordinate, robot->robot_B, i);
+	for (int i = 0; i < DOF; i++) {
+		matrixMultBody(robot_CAL->forKinBody.T, robot_CAL->forKinBody.SE3[i]);
+	}
 }
 
-void matrixExp3(Robot_CAL* robot_CAL, int i) {
+void matrixExp3(ForKin_CAL* forKin_CAL, Theta_CAL* theta_CAL, int i) {
 	for (int j = 0; j < 3; j++)
 		for (int k = 0; k < 3; k++) {
-			robot_CAL->robot_SE3_space[i][j][k] = I[j][k]
-					+ robot_CAL->robot_sin[i]
-							* robot_CAL->robot_omegaHatMat_space[i][j][k]
-					+ (1 - robot_CAL->robot_cos[i])
-							* robot_CAL->robot_omegaHatMat_2_space[i][j][k];
+			forKin_CAL->SE3[i][j][k] = I[j][k]
+					+ theta_CAL[i].robot_sin * forKin_CAL->omegaHatMat[i][j][k]
+					+ (1 - theta_CAL[i].robot_cos)
+							* forKin_CAL->omegaHatMat_2[i][j][k];
 		}
 }
 
-void matrixExp6(Robot_CAL* robot_CAL, const Theta* theta, const Screw_axis* S,
-		int i) {
-	if (robot_CAL->robot_IsZero_space[i] == 1) {
-		robot_CAL->robot_SE3_space[i][0][0] = 1;
-		robot_CAL->robot_SE3_space[i][1][1] = 1;
-		robot_CAL->robot_SE3_space[i][2][2] = 1;
-		robot_CAL->robot_SE3_space[i][0][3] = theta[i] * S[i][3];
-		robot_CAL->robot_SE3_space[i][1][3] = theta[i] * S[i][4];
-		robot_CAL->robot_SE3_space[i][2][3] = theta[i] * S[i][5];
+void matrixExp6(ForKin_CAL* forKin_CAL, Theta_CAL* theta_CAL,
+		const Theta* theta, const Screw_axis* screw_axis, int i) {
+	if (forKin_CAL->isZero[i] == 1) {
+		forKin_CAL->SE3[i][0][0] = 1;
+		forKin_CAL->SE3[i][1][1] = 1;
+		forKin_CAL->SE3[i][2][2] = 1;
+		forKin_CAL->SE3[i][0][3] = theta[i] * screw_axis[i][3];
+		forKin_CAL->SE3[i][1][3] = theta[i] * screw_axis[i][4];
+		forKin_CAL->SE3[i][2][3] = theta[i] * screw_axis[i][5];
 
 	} else {
 		//R
-		matrixExp3(robot_CAL, i);
+		matrixExp3(forKin_CAL, theta_CAL, i);
 		//*
 		double temp[3][3];
 		for (int j = 0; j < 3; j++)
 			for (int k = 0; k < 3; k++) {
 				temp[j][k] = I[j][k] * theta[i]
-						+ (1 - robot_CAL->robot_cos[i])
-								* robot_CAL->robot_omegaHatMat_space[i][j][k]
-						+ (theta[i] - robot_CAL->robot_sin[i])
-								* robot_CAL->robot_omegaHatMat_2_space[i][j][k];
+						+ (1 - theta_CAL[i].robot_cos)
+								* forKin_CAL->omegaHatMat[i][j][k]
+						+ (theta[i] - theta_CAL[i].robot_sin)
+								* forKin_CAL->omegaHatMat_2[i][j][k];
 			}
 		for (int j = 0; j < 3; j++) {
-			robot_CAL->robot_SE3_space[i][j][3] = temp[j][0] * S[i][3]
-					+ temp[j][1] * S[i][4] + temp[j][2] * S[i][5];
+			forKin_CAL->SE3[i][j][3] = temp[j][0] * screw_axis[i][3]
+					+ temp[j][1] * screw_axis[i][4]
+					+ temp[j][2] * screw_axis[i][5];
 		}
 	}
 	//0 0 0 1
 	for (int j = 0; j < 3; j++) {
-		robot_CAL->robot_SE3_space[i][3][j] = 0;
+		forKin_CAL->SE3[i][3][j] = 0;
 	}
-	robot_CAL->robot_SE3_space[i][3][3] = 1;
+	forKin_CAL->SE3[i][3][3] = 1;
 }
-void matrixMult(SE3matrix A, SE3matrix B) {
+void matrixMultSpace(SE3matrix A, SE3matrix B) {
 	SE3matrix B_temp;
 	memcpy(B_temp, B, sizeof(B_temp));
 	for (int i = 0; i < 4; i++) {
@@ -76,6 +89,18 @@ void matrixMult(SE3matrix A, SE3matrix B) {
 			B[i][j] = 0;
 			for (int k = 0; k < 4; k++) {
 				B[i][j] += A[i][k] * B_temp[k][j];
+			}
+		}
+	}
+}
+void matrixMultBody(SE3matrix A, SE3matrix B) {
+	SE3matrix A_temp;
+	memcpy(A_temp, A, sizeof(A_temp));
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			A[i][j] = 0;
+			for (int k = 0; k < 4; k++) {
+				A[i][j] += A_temp[i][k] * B[k][j];
 			}
 		}
 	}

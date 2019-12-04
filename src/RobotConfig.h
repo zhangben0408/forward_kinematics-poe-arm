@@ -16,6 +16,7 @@
 
 #define BaseFrameFlag				0x00
 #define EndEffectorFrameFlag	 	0xFF
+#define ALLFrameFlag				0xAA
 
 typedef double M_matrix[4][4];
 typedef double T_matrix[4][4];
@@ -70,7 +71,7 @@ typedef struct {
 	ForKin_CAL forKinBody;
 } Robot_CAL;
 
-void robotInit(const Robot* robot, Robot_CAL* robot_CAL);
+void robotPreCpt(const Robot* robot, Robot_CAL* robot_CAL);
 int isNearZero(const Screw_axis s);
 void calOmegaHatMatrix(const Screw_axis* S, OmegaHatMatrix* omegaHatMatrix,
 		int i);
