@@ -5,8 +5,8 @@
  *      Author: E260-Ben
  */
 
-#ifndef SRC_FKINEMATICS_H_
-#define SRC_FKINEMATICS_H_
+#ifndef SRC_KINEMATICS_H_
+#define SRC_KINEMATICS_H_
 
 #include "RobotConfig.h"
 
@@ -21,4 +21,4 @@ void matrixExp3(ForKin_CAL* forKin_CAL, Theta_CAL* theta_CAL, int i);
 void matrixMultSpace(SE3matrix A, SE3matrix B);
 void matrixMultBody(SE3matrix A, SE3matrix B);
 
-#endif /* SRC_FKINEMATICS_H_ */
+#endif /* SRC_KINEMATICS_H_ */

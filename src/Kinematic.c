@@ -4,7 +4,7 @@
  *  Created on: 2019Äê11ÔÂ30ÈÕ
  *      Author: E260-Ben
  */
-#include "FKinematics.h"
+#include "Kinematics.h"
 
 void forwardKinematic(const Robot* robot, Robot_CAL* robot_CAL, char flag) {
 	if (flag == BaseFrameFlag)
