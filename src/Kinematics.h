@@ -23,4 +23,6 @@ void matrixExp3(ForKin_CAL* forKin_CAL, Theta_CAL* theta_CAL, int i);
 void matrixMultSpace(SE3matrix A, SE3matrix B);
 void matrixMultBody(SE3matrix A, SE3matrix B);
 
+void adjoint(const SE3matrix T, AdT adT);
+
 #endif /* SRC_KINEMATICS_H_ */

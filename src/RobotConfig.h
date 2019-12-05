@@ -29,6 +29,7 @@ typedef int OmegaNearZero;
 typedef double OmegaHatMatrix[3][3];
 typedef double OmegaHatMatrix_2[3][3];
 
+typedef double AdT[6][6];  //6X6 adjoint representation
 
 /* The input parameters
  * robot_M					: the configuration of robot's end-effector

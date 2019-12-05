@@ -31,6 +31,10 @@ int main() {
 	time = (u64) (end - start) * 1000000000 / COUNTS_PER_SECOND;
 	printf("CAL TIME is %llu ns.\r\n", time);
 
+	//≤‚ ‘adjoint
+	AdT adt;
+	SE3matrix T={{1,0,0,0},{0,0,-1,0},{0,1,0,3},{0,0,0,1}};
+	adjoint(T,adt);
 	return 0;
 }
 

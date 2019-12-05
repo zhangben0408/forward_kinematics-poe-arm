@@ -105,3 +105,25 @@ void matrixMultBody(SE3matrix A, SE3matrix B) {
 		}
 	}
 }
+void adjoint(const SE3matrix T, AdT adT) {
+	double p_so3[3][3] = { { 0, -T[2][3], T[1][3] }, { T[2][3], 0, -T[0][3] }, {
+			-T[1][3], T[0][3], 0 } };
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 6; j++) {
+			if ((i < 3) && (j < 3)) {
+				adT[i][j] = T[i][j];
+			} else if ((i < 3) && (j >= 3)) {
+				adT[i][j] = 0;
+			} else if ((i >= 3) && (j < 3)) {
+				adT[i][j] = 0;
+				for(int k=0;k<3;k++)
+				{
+					adT[i][j]+=p_so3[i-3][k]*T[k][j];
+				}
+			} else {
+				adT[i][j] = T[i - 3][j - 3];
+			}
+		}
+	}
+}
+
