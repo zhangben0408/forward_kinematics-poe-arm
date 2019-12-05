@@ -29,7 +29,7 @@ int main() {
 	//œ‘ æ ±º‰
 	u64 time;
 	time = (u64) (end - start) * 1000000000 / COUNTS_PER_SECOND;
-	printf("CAL TIME is %d ns.\r\n", (u32) time);
+	printf("CAL TIME is %llu ns.\r\n", time);
 
 	return 0;
 }

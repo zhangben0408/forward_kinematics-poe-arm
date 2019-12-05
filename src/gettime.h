@@ -8,7 +8,7 @@
 #ifndef SRC_GETTIME_H_
 #define SRC_GETTIME_H_
 #include "xtime_l.h"
-volatile XTime start,end;
+XTime start,end;
 
 
 #endif /* SRC_GETTIME_H_ */
